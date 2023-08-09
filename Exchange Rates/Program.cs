@@ -15,8 +15,15 @@ internal class Program
     {
         Console.WriteLine("Welcome! Here you can find exchange rates for USD and EUR for specific dates.");
 
-        string inputDate = InputDate();
+        while (true)
+        {
+            string inputDate = InputDate();
+            await GetCurrencyForDate(inputDate);
+        }
+    }
 
+    private static async Task GetCurrencyForDate(string inputDate)
+    {
         using (HttpClient client = new HttpClient())
         {
             // URL to retrieve every currency exchange rate on the given date
