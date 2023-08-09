@@ -59,15 +59,17 @@ internal class Program
 
     private static string InputDate()
     {
-        Console.Write("Enter a date: ");
-        bool isDateValid = DateTime.TryParse(Console.ReadLine(), out DateTime parsedDate);
-
-        if (!isDateValid)
+        while (true)
         {
-            Console.WriteLine("Invalid input. Please try again.");
-            return InputDate();
+            Console.Write("Enter a date: ");
+            if (DateTime.TryParse(Console.ReadLine(), out DateTime parsedDate))
+            {
+                return parsedDate.ToUniversalTime().ToString("yyyy-MM-dd");
+            }
+            else
+            {
+                Console.WriteLine("Invalid input. Please try again.");
+            }
         }
-
-        return parsedDate.ToUniversalTime().ToString("yyyy-MM-dd");
     }
 }
