@@ -18,11 +18,12 @@ internal class Program
         while (true)
         {
             string inputDate = InputDate();
-            await GetCurrencyForDate(inputDate);
+            List<ExchangeRate>? exchangeRates = await GetExchangeRateForDate(inputDate);
+            DisplayExchangeRates(exchangeRates);
         }
     }
 
-    private static async Task GetCurrencyForDate(string inputDate)
+    private static async Task<List<ExchangeRate>?> GetExchangeRateForDate(string inputDate)
     {
         using (HttpClient client = new HttpClient())
         {
@@ -38,18 +39,13 @@ internal class Program
 
                 try
                 {
-                    List<ExchangeRate> responseExchangeRates = JsonSerializer.Deserialize<List<ExchangeRate>>(responseBody);
-
-                    foreach (var exRate in responseExchangeRates)
-                    {
-                        var currencyAbbreviation = exRate.Cur_Abbreviation;
-
-                        // Show data only for selected currencies
-                        if (currencyAbbreviations.Contains(currencyAbbreviation))
-                        {
-                            Console.WriteLine($"Exchange rate for {currencyAbbreviation} is {exRate.Cur_OfficialRate}");
-                        }
-                    }
+                    List<ExchangeRate>? responseExchangeRates = JsonSerializer.Deserialize<List<ExchangeRate>>(responseBody);
+                    
+                    // Filter exchange rates to selected currencies
+                    List<ExchangeRate>? filteredExchangeRates = responseExchangeRates?
+                        .Where(rate => currencyAbbreviations.Contains(rate.Cur_Abbreviation))
+                        .ToList();
+                    return filteredExchangeRates;
                 }
                 catch (JsonException ex)
                 {
@@ -60,7 +56,15 @@ internal class Program
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
+        }
+        return null;
+    }
 
+    private static void DisplayExchangeRates(List<ExchangeRate>? exchangeRates)
+    {
+        foreach (var exRate in exchangeRates)
+        {
+            Console.WriteLine($"Exchange rate for {exRate.Cur_Abbreviation} is {exRate.Cur_OfficialRate}");
         }
     }
 
