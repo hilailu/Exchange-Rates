@@ -1,7 +1,15 @@
-﻿internal class Program
+﻿using System.Text.Json;
+
+internal class Program
 {
+    class ExchangeRate
+    {
+        public string Cur_Abbreviation { get; set; }
+        public decimal Cur_OfficialRate { get; set; }
+    }
+
     private static readonly string baseUrl = "https://api.nbrb.by/";
-    private static readonly string[] currencyCodes = { "USD", "EUR" };
+    private static readonly string[] currencyAbbreviations = { "USD", "EUR" };
 
     static async Task Main(string[] args)
     {
@@ -11,24 +19,41 @@
 
         using (HttpClient client = new HttpClient())
         {
-            // separate requests for currencies
-            foreach (string code in currencyCodes)
+            // URL to retrieve every currency exchange rate on the given date
+            string completeUrl = $"{baseUrl}ExRates/Rates?onDate={inputDate}&Periodicity=0";
+
+            try
             {
-                string completeUrl = $"{baseUrl}ExRates/Rates/{code}?onDate={inputDate}&ParamMode=2";
+                HttpResponseMessage response = await client.GetAsync(completeUrl);
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
 
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(completeUrl);
-                    response.EnsureSuccessStatusCode();
+                    List<ExchangeRate> responseExchangeRates = JsonSerializer.Deserialize<List<ExchangeRate>>(responseBody);
 
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseBody);
+                    foreach (var exRate in responseExchangeRates)
+                    {
+                        var currencyAbbreviation = exRate.Cur_Abbreviation;
+
+                        // Show data only for selected currencies
+                        if (currencyAbbreviations.Contains(currencyAbbreviation))
+                        {
+                            Console.WriteLine($"Exchange rate for {currencyAbbreviation} is {exRate.Cur_OfficialRate}");
+                        }
+                    }
                 }
-                catch (HttpRequestException ex)
+                catch (JsonException ex)
                 {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    Console.WriteLine($"JSON deserialization error: {ex.Message}");
                 }
             }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+
         }
     }
 
@@ -40,7 +65,7 @@
         if (!isDateValid)
         {
             Console.WriteLine("Invalid input. Please try again.");
-            InputDate();
+            return InputDate();
         }
 
         return parsedDate.ToUniversalTime().ToString("yyyy-MM-dd");
