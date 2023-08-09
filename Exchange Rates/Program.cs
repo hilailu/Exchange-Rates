@@ -17,9 +17,22 @@ internal class Program
 
         while (true)
         {
-            string inputDate = InputDate();
-            List<ExchangeRate>? exchangeRates = await GetExchangeRateForDate(inputDate);
-            DisplayExchangeRates(exchangeRates);
+            Console.WriteLine("\nPlease select an option:\n1. Input date manually in console.\n2. Read dates from an Excel file.");
+
+            string option = Console.ReadLine();
+
+            switch (option)
+            {
+                case "1":
+                    await InputDateAndDisplayExchangeRates();
+                    break;
+                case "2":
+                    // Excel logic
+                    break;
+                default:
+                    Console.WriteLine("Please select a valid option.");
+                    break;
+            }
         }
     }
 
@@ -58,6 +71,13 @@ internal class Program
             }
         }
         return null;
+    }
+
+    private static async Task InputDateAndDisplayExchangeRates()
+    {
+        string inputDate = InputDate();
+        List<ExchangeRate>? exchangeRates = await GetExchangeRateForDate(inputDate);
+        DisplayExchangeRates(exchangeRates);
     }
 
     private static void DisplayExchangeRates(List<ExchangeRate>? exchangeRates)
