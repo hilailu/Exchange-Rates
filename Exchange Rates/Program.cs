@@ -88,13 +88,13 @@ internal class Program
         Console.Write("Enter the full path to the Excel file: ");
         string excelFilePath = Console.ReadLine();
 
-        if (File.Exists(excelFilePath))
+        if (File.Exists(excelFilePath) && Path.GetExtension(excelFilePath).Equals(".xlsx"))
         {
             await ReadDatesFromExcelAndWriteExchangeRates(excelFilePath);
         }
         else
         {
-            Console.WriteLine("Path is not valid.");
+            Console.WriteLine("Invalid path or file format.");
         }
     }
 
