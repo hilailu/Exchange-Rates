@@ -4,6 +4,7 @@ using GemBox.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ERWeb.Pages
 {
@@ -46,10 +47,14 @@ namespace ERWeb.Pages
                         if (!string.IsNullOrEmpty(parsedDate))
                         {
                             List<ExchangeRate> exchangeRates = await _exchangeRateService.GetExchangeRateForDate(parsedDate);
-                            var exchangeRate = new DateExchangeRateModel { Id = Guid.NewGuid(), Date = parsedDate, ExchangeRates = exchangeRates };
-                            DateExchangeRates.Add(exchangeRate);
 
-                            _dbContext.DateExchangeRates.Add(exchangeRate);
+                            var usdRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "USD")?.OfficialRate ?? 0.0m;
+                            var eurRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "EUR")?.OfficialRate ?? 0.0m;
+
+                            var dateExRate = new DateExchangeRateModel { Id = Guid.NewGuid(), Date = parsedDate, USDRate = usdRate, EURRate = eurRate };
+
+                            DateExchangeRates.Add(dateExRate);
+                            _dbContext.DateExchangeRates.Add(dateExRate);
                         }
                     }
                 }
@@ -64,7 +69,9 @@ namespace ERWeb.Pages
         public Guid Id { get; set; }
 
         public string Date { get; set; }
-        public List<ExchangeRate> ExchangeRates { get; set; }
+
+        public decimal USDRate { get; set; }
+        public decimal EURRate { get; set; }
     }
 
 }

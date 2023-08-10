@@ -1,5 +1,4 @@
 ﻿using ERWeb.Pages;
-using ExchangeRates;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERWeb.Data
@@ -16,13 +15,6 @@ namespace ERWeb.Data
         {
             modelBuilder.Entity<DateExchangeRateModel>()
                 .HasKey(d => d.Id);
-
-            modelBuilder.Entity<DateExchangeRateModel>()
-                .OwnsMany(d => d.ExchangeRates, e =>
-                {
-                    e.Property(exchangeRate => exchangeRate.Abbreviation);
-                    e.Property(exchangeRate => exchangeRate.OfficialRate);
-                });
         }
     }
 }

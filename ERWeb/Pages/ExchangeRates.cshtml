@@ -13,11 +13,12 @@
 @if (Model.DateExchangeRates != null)
 {
     <h2>Exchange Rates Table</h2>
-    <table>
+    <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Exchange Rates</th>
+                <th scope="col">Date</th>
+                <th scope="col">USD</th>
+                <th scope="col">EUR</th>
             </tr>
         </thead>
         <tbody>
@@ -25,21 +26,8 @@
             {
                 <tr>
                     <td>@item.Date</td>
-                    <td>
-                        @if (item.ExchangeRates != null)
-                        {
-                            <ul>
-                                @foreach (var rate in item.ExchangeRates)
-                                {
-                                    <li>@rate.Abbreviation: @rate.OfficialRate</li>
-                                }
-                            </ul>
-                        }
-                        else
-                        {
-                            <p>No exchange rates found for this date.</p>
-                        }
-                    </td>
+                    <td>@item.USDRate</td>
+                    <td>@item.EURRate</td>
                 </tr>
             }
         </tbody>
