@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Exchange Rates\Exchange Rates.csproj" />
+  </ItemGroup>
+
 </Project>

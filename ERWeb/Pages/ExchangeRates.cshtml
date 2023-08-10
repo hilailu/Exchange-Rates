@@ -1,0 +1,47 @@
+﻿@page
+@model ERWeb.Pages.ExchangeRatesModel
+@{
+}
+
+<h2>Upload Excel File</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <input asp-for="@Model.UploadedFile" type="file" />
+    <button type="submit">Upload</button>
+</form>
+
+@if (Model.DateExchangeRates != null)
+{
+    <h2>Exchange Rates Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Exchange Rates</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.DateExchangeRates)
+            {
+                <tr>
+                    <td>@item.Date</td>
+                    <td>
+                        @if (item.ExchangeRates != null)
+                        {
+                            <ul>
+                                @foreach (var rate in item.ExchangeRates)
+                                {
+                                    <li>@rate.Abbreviation: @rate.OfficialRate</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No exchange rates found for this date.</p>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

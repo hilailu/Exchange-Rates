@@ -1,7 +1,10 @@
+using ExchangeRates;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<ExchangeRateService>();
 
 var app = builder.Build();
 
