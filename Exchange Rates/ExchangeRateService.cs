@@ -1,6 +1,5 @@
 ﻿using GemBox.Spreadsheet;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ExchangeRates
 {
