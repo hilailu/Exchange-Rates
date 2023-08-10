@@ -1,17 +1,21 @@
+using ERWeb.Data;
 using ExchangeRates;
 using GemBox.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.ComponentModel.DataAnnotations;
 
 namespace ERWeb.Pages
 {
     public class ExchangeRatesModel : PageModel
     {
         private readonly ExchangeRateService _exchangeRateService;
+        private readonly ApplicationDbContext _dbContext;
 
-        public ExchangeRatesModel(ExchangeRateService exchangeRateService)
+        public ExchangeRatesModel(ExchangeRateService exchangeRateService, ApplicationDbContext dbContext)
         {
             _exchangeRateService = exchangeRateService;
+            _dbContext = dbContext;
         }
 
         [BindProperty]
@@ -42,16 +46,23 @@ namespace ERWeb.Pages
                         if (!string.IsNullOrEmpty(parsedDate))
                         {
                             List<ExchangeRate> exchangeRates = await _exchangeRateService.GetExchangeRateForDate(parsedDate);
-                            DateExchangeRates.Add(new DateExchangeRateModel { Date = parsedDate, ExchangeRates = exchangeRates });
+                            var exchangeRate = new DateExchangeRateModel { Id = Guid.NewGuid(), Date = parsedDate, ExchangeRates = exchangeRates };
+                            DateExchangeRates.Add(exchangeRate);
+
+                            _dbContext.DateExchangeRates.Add(exchangeRate);
                         }
                     }
                 }
+                await _dbContext.SaveChangesAsync();
             }
         }
     }
 
     public class DateExchangeRateModel
     {
+        [Key]
+        public Guid Id { get; set; }
+
         public string Date { get; set; }
         public List<ExchangeRate> ExchangeRates { get; set; }
     }
