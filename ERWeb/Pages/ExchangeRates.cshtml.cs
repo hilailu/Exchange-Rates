@@ -3,7 +3,6 @@ using ExchangeRates;
 using GemBox.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.ComponentModel.DataAnnotations;
 
 namespace ERWeb.Pages
 {
@@ -22,7 +21,7 @@ namespace ERWeb.Pages
         [BindProperty]
         public IFormFile UploadedFile { get; set; }
 
-        public List<DateExchangeRateModel> DateExchangeRates { get; set; }
+        public List<DateExchangeRate> DateExchangeRates { get; set; }
 
         public async Task OnPostAsync()
         {
@@ -30,34 +29,17 @@ namespace ERWeb.Pages
 
             if (UploadedFile != null && UploadedFile.Length > 0 && Path.GetExtension(UploadedFile.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
             {
-                using (var memoryStream = new MemoryStream())
+                // Get temporary file path
+                var tempFilePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(UploadedFile.FileName));
+                using (var stream = new FileStream(tempFilePath, FileMode.Create))
                 {
-                    await UploadedFile.CopyToAsync(memoryStream);
-
-                    var workbook = ExcelFile.Load(memoryStream, LoadOptions.XlsxDefault);
-                    var worksheet = workbook.Worksheets[0];
-
-                    DateExchangeRates = new List<DateExchangeRateModel>();
-
-                    // Assuming first row contains headers
-                    for (int row = 1; row < worksheet.Rows.Count; row++)
-                    {
-                        var excelDate = worksheet.Cells[row, 0].Value?.ToString();
-                        var parsedDate = _exchangeRateService.ParseDate(excelDate);
-                        if (!string.IsNullOrEmpty(parsedDate))
-                        {
-                            List<ExchangeRate> exchangeRates = await _exchangeRateService.GetExchangeRateForDate(parsedDate);
-
-                            var usdRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "USD")?.OfficialRate ?? 0.0m;
-                            var eurRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "EUR")?.OfficialRate ?? 0.0m;
-
-                            var dateExRate = new DateExchangeRateModel { Id = Guid.NewGuid(), Date = parsedDate, USDRate = usdRate, EURRate = eurRate };
-
-                            DateExchangeRates.Add(dateExRate);
-                            _dbContext.DateExchangeRates.Add(dateExRate);
-                        }
-                    }
+                    await UploadedFile.CopyToAsync(stream);
                 }
+
+                // Retrieve info from excel file
+                DateExchangeRates = await _exchangeRateService.ReadExcelAndGetExchangeRatesWithDates(tempFilePath);
+                DateExchangeRates.ForEach(rate => rate.Id = Guid.NewGuid());
+                _dbContext.DateExchangeRates.AddRange(DateExchangeRates);        
 
                 try
                 {
@@ -74,16 +56,4 @@ namespace ERWeb.Pages
             }
         }
     }
-
-    public class DateExchangeRateModel
-    {
-        [Key]
-        public Guid Id { get; set; }
-
-        public string Date { get; set; }
-
-        public decimal USDRate { get; set; }
-        public decimal EURRate { get; set; }
-    }
-
 }

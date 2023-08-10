@@ -1,4 +1,4 @@
-﻿using ERWeb.Pages;
+﻿using ExchangeRates;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERWeb.Data
@@ -9,14 +9,14 @@ namespace ERWeb.Data
         {
         }
 
-        public DbSet<DateExchangeRateModel> DateExchangeRates { get; set; }
+        public DbSet<DateExchangeRate> DateExchangeRates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<DateExchangeRateModel>()
+            modelBuilder.Entity<DateExchangeRate>()
                 .HasKey(d => d.Id);
 
-            modelBuilder.Entity<DateExchangeRateModel>()
+            modelBuilder.Entity<DateExchangeRate>()
                 .HasIndex(d => d.Date)
                 .IsUnique();
         }

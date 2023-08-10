@@ -22,7 +22,7 @@ namespace ERWeb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ERWeb.Pages.DateExchangeRateModel", b =>
+            modelBuilder.Entity("ExchangeRates.DateExchangeRate", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

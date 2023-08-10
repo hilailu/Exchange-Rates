@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230810083333_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20230810114532_InitialMigartion")]
+    partial class InitialMigartion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace ERWeb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ERWeb.Pages.DateExchangeRateModel", b =>
+            modelBuilder.Entity("ExchangeRates.DateExchangeRate", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
