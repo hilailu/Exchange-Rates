@@ -1,4 +1,5 @@
-﻿using GemBox.Spreadsheet;
+﻿using ExchangeRatesLib;
+using GemBox.Spreadsheet;
 
 namespace ExchangeRates
 {
@@ -8,7 +9,7 @@ namespace ExchangeRates
 
         static async Task Main(string[] args)
         {
-            SpreadsheetInfo.SetLicense("FREE-LIMITED-KEY");
+            SpreadsheetInfo.SetLicense(Constants.GemBoxKey);
 
             Console.WriteLine("Welcome! Here you can find exchange rates for USD and EUR for specific dates.");
 
@@ -36,7 +37,7 @@ namespace ExchangeRates
         private static async Task InputDateAndDisplayExchangeRates()
         {
             var inputDate = InputDate();
-            List<ExchangeRate>? exchangeRates = await _exchangeRateService.GetExchangeRateForDate(inputDate);
+            var exchangeRates = await _exchangeRateService.GetExchangeRateForDate(inputDate);
             DisplayExchangeRates(exchangeRates);
         }
 
@@ -45,15 +46,15 @@ namespace ExchangeRates
             Console.Write("Enter the full path to the Excel file: ");
             var excelFilePath = Console.ReadLine();
 
-            if (File.Exists(excelFilePath) && Path.GetExtension(excelFilePath).Equals(".xlsx"))
+            if (_exchangeRateService.IsValidExcelFile(excelFilePath))
             {
                 var dateExchangeRates = await _exchangeRateService.ReadExcelAndGetExchangeRatesWithDates(excelFilePath);
-                _exchangeRateService.WriteExchangeRatesToExcelFile(excelFilePath, dateExchangeRates);
-                Console.WriteLine("File modified successfully.");
+                var isWriteSuccessful = _exchangeRateService.IsWriteExchangeRatesToExcelFileSuccessful(excelFilePath, dateExchangeRates);
+                Console.WriteLine(isWriteSuccessful ? "File modified successfully." : Constants.ErrorNoDateEntries);
             }
             else
             {
-                Console.WriteLine("Invalid path or file format.");
+                Console.WriteLine(Constants.ErrorInvalidPathOrFormat);
             }
         }
 
@@ -77,7 +78,7 @@ namespace ExchangeRates
                 }
                 else
                 {
-                    Console.WriteLine("Invalid input. Please try again.");
+                    Console.WriteLine();
                 }
             }
         }

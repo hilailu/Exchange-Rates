@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Exchange Rates", "Exchange Rates\Exchange Rates.csproj", "{BD4743D8-4D48-49D2-A84D-4F6A9C200F3A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ERWeb", "ERWeb\ERWeb.csproj", "{2DBBAFFA-2CE8-4E37-8088-532458DCACDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ERWeb", "ERWeb\ERWeb.csproj", "{2DBBAFFA-2CE8-4E37-8088-532458DCACDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeRatesLib", "ExchangeRatesLib\ExchangeRatesLib.csproj", "{A1815125-F74C-4494-9319-3B4D616FA9B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{2DBBAFFA-2CE8-4E37-8088-532458DCACDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DBBAFFA-2CE8-4E37-8088-532458DCACDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DBBAFFA-2CE8-4E37-8088-532458DCACDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1815125-F74C-4494-9319-3B4D616FA9B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1815125-F74C-4494-9319-3B4D616FA9B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1815125-F74C-4494-9319-3B4D616FA9B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1815125-F74C-4494-9319-3B4D616FA9B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

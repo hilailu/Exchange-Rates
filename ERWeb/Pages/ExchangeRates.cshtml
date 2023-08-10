@@ -17,7 +17,7 @@
     </div>
 }
 
-@if (Model.DateExchangeRates != null)
+@if (Model.DateExchangeRates != null && Model.DateExchangeRates.Count != 0)
 {
     <h2>Exchange Rates Table</h2>
     <table class="table table-bordered">

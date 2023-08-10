@@ -1,4 +1,4 @@
-﻿using ExchangeRates;
+﻿using ExchangeRatesLib;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERWeb.Data

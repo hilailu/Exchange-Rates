@@ -1,30 +1,29 @@
 ﻿using GemBox.Spreadsheet;
 using System.Text.Json;
 
-namespace ExchangeRates
+namespace ExchangeRatesLib
 {
     public class ExchangeRateService
     {
-        private readonly string _baseUrl = "https://api.nbrb.by/";
-        private readonly string[] _currencyAbbreviations = { "USD", "EUR" };
+        private readonly string[] _currencyAbbreviations = { Constants.USD, Constants.EUR };
 
         public async Task<List<ExchangeRate>?> GetExchangeRateForDate(string inputDate)
         {
             using (HttpClient client = new HttpClient())
             {
                 // URL to retrieve every currency exchange rate on the given date
-                var completeUrl = $"{_baseUrl}ExRates/Rates?onDate={inputDate}&Periodicity=0";
+                var completeUrl = $"{Constants.BaseApiUrl}ExRates/Rates?onDate={inputDate}&Periodicity=0";
 
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(completeUrl);
+                    var response = await client.GetAsync(completeUrl);
                     response.EnsureSuccessStatusCode();
 
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    List<ExchangeRate>? responseExchangeRates = JsonSerializer.Deserialize<List<ExchangeRate>>(responseBody);
+                    var responseExchangeRates = JsonSerializer.Deserialize<List<ExchangeRate>>(responseBody);
 
                     // Filter exchange rates to selected currencies
-                    List<ExchangeRate>? filteredExchangeRates = responseExchangeRates?
+                    var filteredExchangeRates = responseExchangeRates?
                         .Where(rate => _currencyAbbreviations.Contains(rate.Abbreviation))
                         .ToList();
 
@@ -32,11 +31,15 @@ namespace ExchangeRates
                 }
                 catch (HttpRequestException ex)
                 {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    Console.WriteLine($"HTTP error: {ex.Message}");
                 }
                 catch (JsonException ex)
                 {
                     Console.WriteLine($"JSON deserialization error: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occured: {ex.Message}");
                 }
             }
             return null;
@@ -44,13 +47,18 @@ namespace ExchangeRates
 
         public async Task<List<DateExchangeRate>> ReadExcelAndGetExchangeRatesWithDates(string path)
         {
-            ExcelFile file = ExcelFile.Load(path);
-            ExcelWorksheet ws = file.Worksheets[0];
-
             List<DateExchangeRate> dateExchangeRates = new List<DateExchangeRate>();
 
+            if (!IsValidExcelFile(path))
+            {
+                return dateExchangeRates;
+            }
+
+            var file = ExcelFile.Load(path);
+            var ws = file.Worksheets[0];
+
             // Assuming the dates are in the first column
-            foreach (var cell in ws.Columns[0].Cells)
+            foreach (var cell in ws.Columns[(int)Indexes.Date].Cells)
             {
                 var date = ParseDate(cell.Value?.ToString());
                 if (!string.IsNullOrEmpty(date))
@@ -58,8 +66,8 @@ namespace ExchangeRates
                     var exchangeRates = await GetExchangeRateForDate(date);
 
                     // Retrieve official rates for currencies
-                    var usdRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "USD")?.OfficialRate ?? 0.0m;
-                    var eurRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "EUR")?.OfficialRate ?? 0.0m;
+                    var usdRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == Constants.USD)?.OfficialRate ?? 0.0m;
+                    var eurRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == Constants.EUR)?.OfficialRate ?? 0.0m;
 
                     dateExchangeRates.Add(new DateExchangeRate { Date = date, EURRate = eurRate, USDRate = usdRate });
                 }
@@ -67,8 +75,13 @@ namespace ExchangeRates
             return dateExchangeRates;
         }
 
-        public void WriteExchangeRatesToExcelFile(string path, List<DateExchangeRate> dateExchangeRates)
+        public bool IsWriteExchangeRatesToExcelFileSuccessful(string path, List<DateExchangeRate> dateExchangeRates)
         {
+            if (!IsValidExcelFile(path) || dateExchangeRates.Count == 0)
+            {
+                return false;
+            }
+
             ExcelFile file = ExcelFile.Load(path);
 
             // Create a new worksheet or clear it if it already exists
@@ -83,27 +96,23 @@ namespace ExchangeRates
                 ws.Clear();
             }
 
-            // Define column indexes for specific contents
-            int dateIndex = 0;
-            int usdIndex = 1;
-            int eurIndex = 2;
-
             // Add header row
             ws.Rows.InsertEmpty(0, 1);
-            ws.Cells[0, dateIndex].Value = "Date";
-            ws.Cells[0, usdIndex].Value = "USD";
-            ws.Cells[0, eurIndex].Value = "EUR";
+            ws.Cells[0, (int)Indexes.Date].Value = Constants.Date;
+            ws.Cells[0, (int)Indexes.USD].Value = Constants.USD;
+            ws.Cells[0, (int)Indexes.EUR].Value = Constants.EUR;
 
             // Write data to Excel file
             for (int i = 1; i < dateExchangeRates.Count + 1; i++)
             {
                 var rate = dateExchangeRates[i - 1];
-                ws.Cells[i, dateIndex].Value = rate.Date;
-                ws.Cells[i, usdIndex].Value = rate.USDRate;
-                ws.Cells[i, eurIndex].Value = rate.EURRate;
+                ws.Cells[i, (int)Indexes.Date].Value = rate.Date;
+                ws.Cells[i, (int)Indexes.USD].Value = rate.USDRate;
+                ws.Cells[i, (int)Indexes.EUR].Value = rate.EURRate;
             }
 
             file.Save(path);
+            return true;
         }
 
         public string ParseDate(string inputDate)
@@ -118,5 +127,8 @@ namespace ExchangeRates
                 return string.Empty;
             }
         }
+
+        public bool IsValidExcelFile(string path, bool isTemp = false)
+            => (File.Exists(path) || isTemp) && Path.GetExtension(path).Equals(".xlsx", StringComparison.OrdinalIgnoreCase);
     }
 }

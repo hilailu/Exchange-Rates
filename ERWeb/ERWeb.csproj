@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GemBox.Spreadsheet" Version="49.0.1423" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.10">
@@ -16,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Exchange Rates\Exchange Rates.csproj" />
+    <ProjectReference Include="..\ExchangeRatesLib\ExchangeRatesLib.csproj" />
   </ItemGroup>
 
 </Project>

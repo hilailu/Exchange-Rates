@@ -1,5 +1,5 @@
 using ERWeb.Data;
-using ExchangeRates;
+using ExchangeRatesLib;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
