@@ -47,7 +47,8 @@ namespace ExchangeRates
 
             if (File.Exists(excelFilePath) && Path.GetExtension(excelFilePath).Equals(".xlsx"))
             {
-                await _exchangeRateService.ReadDatesFromExcelAndWriteExchangeRates(excelFilePath);
+                var dateExchangeRates = await _exchangeRateService.ReadExcelAndGetExchangeRatesWithDates(excelFilePath);
+                _exchangeRateService.WriteExchangeRatesToExcelFile(excelFilePath, dateExchangeRates);
                 Console.WriteLine("File modified successfully.");
             }
             else

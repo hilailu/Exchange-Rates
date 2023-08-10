@@ -1,5 +1,6 @@
 ﻿using GemBox.Spreadsheet;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ExchangeRates
 {
@@ -42,49 +43,65 @@ namespace ExchangeRates
             return null;
         }
 
-        public async Task ReadDatesFromExcelAndWriteExchangeRates(string path)
+        public async Task<List<DateExchangeRate>> ReadExcelAndGetExchangeRatesWithDates(string path)
         {
             ExcelFile file = ExcelFile.Load(path);
             ExcelWorksheet ws = file.Worksheets[0];
 
-            // Assuming that the dates are in the first column
-            int dateColumnIndex = 0;
+            List<DateExchangeRate> dateExchangeRates = new List<DateExchangeRate>();
 
-            // Offset for writing in the exchange rates
-            int columnOffset = 1;
-
-            // Insert header row with content names (assuming the file has only dates)
-            ws.Rows.InsertEmpty(0, 1);
-            ws.Cells[0, dateColumnIndex].Value = "Date";
-            for (int i = 0; i < _currencyAbbreviations.Length; i++)
+            // Assuming the dates are in the first column
+            foreach (var cell in ws.Columns[0].Cells)
             {
-                ws.Cells[0, i + columnOffset].Value = _currencyAbbreviations[i];
+                var date = ParseDate(cell.Value?.ToString());
+                if (!string.IsNullOrEmpty(date))
+                {
+                    var exchangeRates = await GetExchangeRateForDate(date);
+
+                    // Retrieve official rates for currencies
+                    var usdRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "USD")?.OfficialRate ?? 0.0m;
+                    var eurRate = exchangeRates?.FirstOrDefault(rate => rate.Abbreviation == "EUR")?.OfficialRate ?? 0.0m;
+
+                    dateExchangeRates.Add(new DateExchangeRate { Date = date, EURRate = eurRate, USDRate = usdRate });
+                }
+            }
+            return dateExchangeRates;
+        }
+
+        public void WriteExchangeRatesToExcelFile(string path, List<DateExchangeRate> dateExchangeRates)
+        {
+            ExcelFile file = ExcelFile.Load(path);
+
+            // Create a new worksheet or clear it if it already exists
+            var worksheetName = "Exchange Rates";
+            var ws = file.Worksheets.FirstOrDefault(ws => ws.Name == worksheetName);
+            if (ws == null)
+            {
+                ws = file.Worksheets.Add(worksheetName);
+            }
+            else
+            {
+                ws.Clear();
             }
 
-            // Start from 1st row to skip header
-            for (int rowIndex = 1; rowIndex < ws.Rows.Count; rowIndex++)
+            // Define column indexes for specific contents
+            int dateIndex = 0;
+            int usdIndex = 1;
+            int eurIndex = 2;
+
+            // Add header row
+            ws.Rows.InsertEmpty(0, 1);
+            ws.Cells[0, dateIndex].Value = "Date";
+            ws.Cells[0, usdIndex].Value = "USD";
+            ws.Cells[0, eurIndex].Value = "EUR";
+
+            // Write data to Excel file
+            for (int i = 1; i < dateExchangeRates.Count + 1; i++)
             {
-                var dateValue = ws.Cells[rowIndex, dateColumnIndex].Value?.ToString();
-                var parsedDate = ParseDate(dateValue);
-
-                // If the date is invalid, skip the row
-                if (!string.IsNullOrEmpty(parsedDate))
-                {
-                    List<ExchangeRate>? exchangeRates = await GetExchangeRateForDate(parsedDate);
-
-                    if (exchangeRates != null)
-                    {
-                        foreach (var exRate in exchangeRates)
-                        {
-                            var exchangeRate = exRate.OfficialRate;
-
-                            // Get column index to insert the value
-                            var columnIndex = Array.IndexOf(_currencyAbbreviations, exRate.Abbreviation) + columnOffset;
-
-                            ws.Cells[rowIndex, columnIndex].Value = exchangeRate;
-                        }
-                    }
-                }
+                var rate = dateExchangeRates[i - 1];
+                ws.Cells[i, dateIndex].Value = rate.Date;
+                ws.Cells[i, usdIndex].Value = rate.USDRate;
+                ws.Cells[i, eurIndex].Value = rate.EURRate;
             }
 
             file.Save(path);
@@ -94,7 +111,7 @@ namespace ExchangeRates
         {
             if (DateTime.TryParse(inputDate, out DateTime parsedDate))
             {
-                return parsedDate.ToUniversalTime().ToString("yyyy-MM-dd");
+                return parsedDate.ToString("yyyy-MM-dd");
             }
             else
             {
