@@ -15,6 +15,10 @@ namespace ERWeb.Data
         {
             modelBuilder.Entity<DateExchangeRateModel>()
                 .HasKey(d => d.Id);
+
+            modelBuilder.Entity<DateExchangeRateModel>()
+                .HasIndex(d => d.Date)
+                .IsUnique();
         }
     }
 }

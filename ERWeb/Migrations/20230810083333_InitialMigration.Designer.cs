@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230810082457_InitialMigration")]
+    [Migration("20230810083333_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -33,7 +33,7 @@ namespace ERWeb.Migrations
 
                     b.Property<string>("Date")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("EURRate")
                         .HasColumnType("decimal(18,2)");
@@ -42,6 +42,9 @@ namespace ERWeb.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Date")
+                        .IsUnique();
 
                     b.ToTable("DateExchangeRates");
                 });

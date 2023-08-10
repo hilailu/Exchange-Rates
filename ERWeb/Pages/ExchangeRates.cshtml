@@ -10,6 +10,13 @@
     <button type="submit">Upload</button>
 </form>
 
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @Model.ErrorMessage
+    </div>
+}
+
 @if (Model.DateExchangeRates != null)
 {
     <h2>Exchange Rates Table</h2>

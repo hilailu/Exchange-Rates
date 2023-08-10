@@ -4,7 +4,6 @@ using GemBox.Spreadsheet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ERWeb.Pages
 {
@@ -12,6 +11,7 @@ namespace ERWeb.Pages
     {
         private readonly ExchangeRateService _exchangeRateService;
         private readonly ApplicationDbContext _dbContext;
+        public string ErrorMessage { get; private set; }
 
         public ExchangeRatesModel(ExchangeRateService exchangeRateService, ApplicationDbContext dbContext)
         {
@@ -28,7 +28,7 @@ namespace ERWeb.Pages
         {
             SpreadsheetInfo.SetLicense("FREE-LIMITED-KEY");
 
-            if (UploadedFile != null && UploadedFile.Length > 0)
+            if (UploadedFile != null && UploadedFile.Length > 0 && Path.GetExtension(UploadedFile.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
             {
                 using (var memoryStream = new MemoryStream())
                 {
@@ -58,7 +58,19 @@ namespace ERWeb.Pages
                         }
                     }
                 }
-                await _dbContext.SaveChangesAsync();
+
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = "Some entries weren't saved to the database. We don't store duplicate dates.";
+                }
+            }
+            else
+            {
+                ErrorMessage = "Please provide an *.xlsx file.";
             }
         }
     }

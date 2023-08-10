@@ -16,7 +16,7 @@ namespace ERWeb.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Date = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Date = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     USDRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     EURRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
@@ -24,6 +24,12 @@ namespace ERWeb.Migrations
                 {
                     table.PrimaryKey("PK_DateExchangeRates", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DateExchangeRates_Date",
+                table: "DateExchangeRates",
+                column: "Date",
+                unique: true);
         }
 
         /// <inheritdoc />
